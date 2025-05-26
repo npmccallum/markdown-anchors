@@ -49,7 +49,7 @@ There are three forms of anchor:
 Creates an invisible linkable anchor:
 
 ```markdown
-[@v1.1] This text has an invisible anchor at the beginning.
+[!v1.1] This text has an invisible anchor at the beginning.
 ```
 
 This renders as:
@@ -63,7 +63,7 @@ This renders as:
 Creates a visible anchor that displays the ID:
 
 ```markdown
-[@v1.1!] This text has a visible anchor showing the ID.
+[!v1.1!] This text has a visible anchor showing the ID.
 ```
 
 This renders as:
@@ -77,7 +77,7 @@ This renders as:
 Creates a visible anchor with custom display text:
 
 ```markdown
-[@chapter-1-opening!1.1] It was the best of times, it was the worst of times, it
+[!chapter-1-opening!1.1] It was the best of times, it was the worst of times, it
 was the age of wisdom, it was the age of foolishness.
 ```
 
@@ -104,9 +104,9 @@ the central paradox.
 ### Headings
 
 ```markdown
-[@intro] # Introduction
+[!intro] # Introduction
 
-# [@key-concepts!Concepts] and Applications
+# [!key-concepts!Concepts] and Applications
 ```
 
 Renders as:
@@ -120,7 +120,7 @@ Renders as:
 ### Blockquotes
 
 ```markdown
-> [@quote1] This is an anchored quote.
+> [!quote1] This is an anchored quote.
 ```
 
 Renders as:
@@ -136,7 +136,7 @@ Renders as:
 ```markdown
 | Section            | Description               |
 | ------------------ | ------------------------- |
-| [@sec1!sec1] First | Description of first item |
+| [!sec1!sec1] First | Description of first item |
 ```
 
 Renders as:
@@ -165,10 +165,10 @@ emitted.
 
 ````markdown
 ```
-[@not-an-anchor] This is code, not an anchor
+[!not-an-anchor] This is code, not an anchor
 ```
 
-`[@also-not-an-anchor] This is inline code`
+`[!also-not-an-anchor] This is inline code`
 ````
 
 ## Escaping
@@ -176,7 +176,7 @@ emitted.
 To display literal anchor syntax, use backslash escaping:
 
 ```markdown
-\[@v1.1] This is not an anchor, just literal text. \[@long-id!1.1] This is also
+\[!v1.1] This is not an anchor, just literal text. \[!long-id!1.1] This is also
 not an anchor.
 ```
 
@@ -187,9 +187,9 @@ not an anchor.
 ```markdown
 # Aristotle, Nicomachean Ethics Book I
 
-[@ne-1094a1!1094a1] Every art and every inquiry, and similarly every action and
+[!ne-1094a1!1094a1] Every art and every inquiry, and similarly every action and
 pursuit, is thought to aim at some good; and for this reason the good has
-rightly been declared to be that at which all things aim. [@ne-1094a3!1094a3]
+rightly been declared to be that at which all things aim. [!ne-1094a3!1094a3]
 But a certain difference is found among ends; some are activities, others are
 products apart from the activities that produce them.
 
@@ -199,15 +199,15 @@ human activities aim at some perceived good.
 
 ## Rationale
 
-The `[@id]` and related syntaxes were chosen because:
+The `[!id]` and related syntaxes were chosen because:
 
 1. **Consistency with linking patterns**: Square brackets are used throughout
    CommonMark for linking constructs (links, reference links, footnotes), making
    this extension feel natural
-2. **No parsing conflicts**: The `[@id]`, `[@id!]`, and `[@id!display]` patterns
+2. **No parsing conflicts**: The `[!id]`, `[!id!]`, and `[!id!display]` patterns
    do not conflict with any existing CommonMark syntax
-3. **Clean separation of concerns**: Invisible form (`[@id]`) creates invisible
-   linkable points, visible forms (`[@id!]` and `[@id!display]`) add visible
+3. **Clean separation of concerns**: Invisible form (`[!id]`) creates invisible
+   linkable points, visible forms (`[!id!]` and `[!id!display]`) add visible
    text when needed
 4. **Unambiguous parsing**: The exclamation mark clearly indicates when display
    text should appear, eliminating parsing ambiguity
