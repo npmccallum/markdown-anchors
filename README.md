@@ -2,7 +2,7 @@
 
 ## Document Information
 
-- Date: March 30, 2025
+- Date: May 27, 2025
 - Version: 0.1.0
 
 ## Introduction
@@ -23,7 +23,7 @@ to particular lines, verses, or numbered segments. Religious and philosophical
 texts employ traditional versification systems for precise quotation and
 cross-reference.
 
-Unlike heading-based references, these anchor systems often ingore structural
+Unlike heading-based references, these anchor systems often ignore structural
 boundaries. A single numbered anchor might refer to multiple paragraphs, break
 mid-sentence, or appear within lists, tables, or other formatted content. The
 anchor markers are overlaid onto the document's logical structure rather than
@@ -37,56 +37,47 @@ linkable location markers.
 This extension can be implemented as a simple preprocessor that runs before
 standard markdown processing, making it immediately adoptable without requiring
 parser modifications. The preprocessor replaces anchor syntax with HTML spans,
-ensuring compatibility with any existing markdown processor.
+ensuring compatibility with any existing markdown processor. Likewise, a similar
+strategy can be taken with postprocessing.
 
 ## Syntax
 
-An anchor provides a simple syntax to facilitate non-structure reference points.
-There are three forms of anchor:
+There are two forms of Markdown anchor:
 
-### Invisible Form
+- `<#foo>` - renders: `<span id="foo">foo</span>`
+- `[bar]<#foo>` - renders: `<span id="foo">bar</span>`
 
-Creates an invisible linkable anchor:
+The second form of the anchor syntax contains two fields (from left to right):
 
-```markdown
-[!v1.1] This text has an invisible anchor at the beginning.
-```
+- Text
+- ID
 
-This renders as:
+### Text Field
 
-```html
-<span id="v1.1"></span> This text has an invisible anchor at the beginning.
-```
+The text field has exactly the same syntax and semantics as the text field of
+the link element as defined in [CommonMark][commonmark-links].
 
-### Visible Form
+The text field may be empty to create invisible anchors. For example, `[]<#foo>`
+renders as `<span id="foo"></span>`.
 
-Creates a visible anchor that displays the ID:
+### ID Field
 
-```markdown
-[!v1.1!] This text has a visible anchor showing the ID.
-```
+The ID field has exactly the same syntax and semantics of the `id` attribute as
+defined in the [HTML Living Standard][html-id]. Note especially that IDs must
+have at least one character and be unique.
 
-This renders as:
+Additionally, since angle brackets (`<` and `>`) are used as syntax delimiters,
+the ID field requires that they must either be balanced or escaped. This mirrors
+the same syntax and semantics as the square brackets (`[` and `]`) in the text
+field of the link element as defined in [CommonMark][commonmark-links].
 
-```html
-<span id="v1.1">v1.1</span> This text has a visible anchor showing the ID.
-```
+For example:
 
-### Custom Form
-
-Creates a visible anchor with custom display text:
-
-```markdown
-[!chapter-1-opening!1.1] It was the best of times, it was the worst of times, it
-was the age of wisdom, it was the age of foolishness.
-```
-
-This renders as:
-
-```html
-<span id="chapter-1-opening">1.1</span> It was the best of times, it was the
-worst of times, it was the age of wisdom, it was the age of foolishness.
-```
+- Balanced: `<#my<id>>`
+  - Renders: `<span id="my<id>">my&lt;id&gt;</span>`
+  - Note: Propagated angle brackets must be escaped in HTML content!
+- Escaped: `[text]<#foo\>bar>`
+  - Renders: `<span id="foo>bar">text</span>`
 
 ## Referencing Anchors
 
@@ -99,86 +90,23 @@ themes. As mentioned in [chapter 1.1](#chapter-1-opening), Dickens establishes
 the central paradox.
 ```
 
-## Interaction with Existing Markdown Elements
+## Interaction with Markdown Elements
 
-### Headings
+### Existing Elements
 
-```markdown
-[!intro] # Introduction
+Since anchors behave substantially like links, parsers should ensure that they
+can be used in all the same places that links are used, according to the
+specification followed by the parser. Broadly speaking (after a quick review of
+some of the specifications), this implies that anchors can be used in headings,
+blockquotes, lists, and tables, but not code blocks. However, this summary does
+not imply an implementation constraint beyond the underlying Markdown
+specification you are implementing.
 
-# [!key-concepts!Concepts] and Applications
-```
+### Nested Anchors
 
-Renders as:
-
-```html
-<span id="intro"></span>
-<h1>Introduction</h1>
-<h1><span id="key-concepts">Concepts</span> and Applications</h1>
-```
-
-### Blockquotes
-
-```markdown
-> [!quote1] This is an anchored quote.
-```
-
-Renders as:
-
-```html
-<blockquote>
-  <p><span id="quote1"></span> This is an anchored quote.</p>
-</blockquote>
-```
-
-### Tables
-
-```markdown
-| Section            | Description               |
-| ------------------ | ------------------------- |
-| [!sec1!sec1] First | Description of first item |
-```
-
-Renders as:
-
-```html
-<table>
-  <thead>
-    <tr>
-      <th>Section</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><span id="sec1">sec1</span> First</td>
-      <td>Description of first item</td>
-    </tr>
-  </tbody>
-</table>
-```
-
-### Code Blocks
-
-Anchors within code blocks are treated as literal text. No span element is
-emitted.
-
-````markdown
-```
-[!not-an-anchor] This is code, not an anchor
-```
-
-`[!also-not-an-anchor] This is inline code`
-````
-
-## Escaping
-
-To display literal anchor syntax, use backslash escaping:
-
-```markdown
-\[!v1.1] This is not an anchor, just literal text. \[!long-id!1.1] This is also
-not an anchor.
-```
+While nested anchors are syntactically valid (e.g., `[<#inner>]<#outer>`), they
+are not recommended as they create complex ID relationships and may confuse
+readers about which anchor is being referenced.
 
 ## Examples
 
@@ -187,9 +115,9 @@ not an anchor.
 ```markdown
 # Aristotle, Nicomachean Ethics Book I
 
-[!ne-1094a1!1094a1] Every art and every inquiry, and similarly every action and
+[1094a1]<#ne-1094a1> Every art and every inquiry, and similarly every action and
 pursuit, is thought to aim at some good; and for this reason the good has
-rightly been declared to be that at which all things aim. [!ne-1094a3!1094a3]
+rightly been declared to be that at which all things aim. [1094a3]<#ne-1094a3>
 But a certain difference is found among ends; some are activities, others are
 products apart from the activities that produce them.
 
@@ -199,25 +127,60 @@ human activities aim at some perceived good.
 
 ## Rationale
 
-The `[!id]` and related syntaxes were chosen because:
+Some parsers already support the syntax of `# Heading {#id}`. This clearly
+defines a need to attach ID to structural elements. However, no such parallel
+exists for non-structural anchors. The syntax defined in this document can be
+used in headings. This implies that this syntax can either supplement or replace
+this existing extension.
 
-1. **Consistency with linking patterns**: Square brackets are used throughout
-   CommonMark for linking constructs (links, reference links, footnotes), making
-   this extension feel natural
-2. **No parsing conflicts**: The `[!id]`, `[!id!]`, and `[!id!display]` patterns
-   do not conflict with any existing CommonMark syntax
-3. **Clean separation of concerns**: Invisible form (`[!id]`) creates invisible
-   linkable points, visible forms (`[!id!]` and `[!id!display]`) add visible
-   text when needed
-4. **Unambiguous parsing**: The exclamation mark clearly indicates when display
-   text should appear, eliminating parsing ambiguity
+The `<#id>` and `[display]<#id>` syntaxes were chosen because:
+
+1. **Consistency with fragment identifiers**: The `#` symbol is already
+   associated with anchors and fragments in URLs, making this extension feel
+   natural.
+2. **No parsing conflicts**: The `<#id>` and `[display]<#id>` patterns do not
+   conflict with any existing CommonMark syntax and tested clean across major
+   parsers.
+3. **Clean separation of concerns**: The simple form (`<#id>`) uses the ID as
+   display text, while the custom form (`[display]<#id>`) allows any display
+   text including empty for invisible anchors. This gives full flexibility.
+4. **Familiar bracket usage**: The `[display]` portion follows the same rules as
+   CommonMark link text, leveraging existing knowledge.
 5. **Leverages existing linking**: References use standard CommonMark fragment
-   links, requiring no new syntax
+   links, requiring no new syntax.
 6. **Minimal HTML**: Produces simple, clean HTML without mandating presentation
-   decisions
+   decisions.
 7. **Unified namespace**: Works seamlessly with any other ID-generating
-   mechanisms since they all share the HTML ID namespace
+   mechanisms since they all share the HTML ID namespace.
 
 The choice to treat anchors as pure location markers reflects the reality of
 versification systems where markers often don't align with structural document
 elements and may appear mid-sentence or mid-thought.
+
+## Security Considerations
+
+When implementing this extension, consider the following security implications:
+
+1. **HTML Injection**: Since anchor IDs are inserted directly into HTML `id`
+   attributes, implementers must ensure that IDs are properly sanitized
+   according to HTML standards. Malicious IDs could potentially break HTML
+   structure or introduce unexpected behavior.
+
+2. **XSS Prevention**: While `id` attributes have limited XSS potential compared
+   to other HTML attributes, implementers should validate that IDs conform to
+   HTML specifications and do not contain characters that could be
+   misinterpreted by browsers.
+
+3. **ID Collision Attacks**: In environments where multiple users can contribute
+   content, implementers should consider how duplicate IDs are handled to
+   prevent one user from overriding another's anchor references.
+
+4. **Content Injection**: The text portion of anchors follows CommonMark link
+   text rules, which may allow HTML entities or other markup. Implementers
+   should apply the same security measures used for link text processing.
+
+These considerations are not unique to this extension but apply to any system
+that processes user-provided IDs or generates HTML from markdown content.
+
+[commonmark-links]: https://spec.commonmark.org/0.31.2/#links
+[html-id]: https://html.spec.whatwg.org/multipage/dom.html#the-id-attribute
