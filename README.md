@@ -44,40 +44,38 @@ strategy can be taken with postprocessing.
 
 There are two forms of Markdown anchor:
 
-- `<#foo>` - renders: `<span id="foo">foo</span>`
-- `[bar]<#foo>` - renders: `<span id="foo">bar</span>`
+- `[!foo]` - renders: `<span id="foo">foo</span>`
+- `[!foo bar]` - renders: `<span id="foo">bar</span>`
 
-The second form of the anchor syntax contains two fields (from left to right):
+The anchor syntax contains two fields (from left to right):
 
-- Text
 - ID
-
-### Text Field
-
-The text field has exactly the same syntax and semantics as the text field of
-the link element as defined in [CommonMark][commonmark-links].
-
-The text field may be empty to create invisible anchors. For example, `[]<#foo>`
-renders as `<span id="foo"></span>`.
+- Text (optional)
 
 ### ID Field
 
-The ID field has exactly the same syntax and semantics of the `id` attribute as
-defined in the [HTML Living Standard][html-id]. Note especially that IDs must
-have at least one character and be unique.
+The ID field comes first within the square brackets, immediately following the
+`!` marker. The ID field has exactly the same syntax and semantics of the `id`
+attribute as defined in the [HTML Living Standard][html-id]. Note especially
+that IDs must have at least one character and be unique.
 
-Additionally, since angle brackets (`<` and `>`) are used as syntax delimiters,
-the ID field requires that they must either be balanced or escaped. This mirrors
-the same syntax and semantics as the square brackets (`[` and `]`) in the text
-field of the link element as defined in [CommonMark][commonmark-links].
+The ID field is delimited from the optional text field by the first whitespace
+character within the brackets. Any square brackets within the ID field must
+either be balanced or escaped, following the same rules as other bracketed
+elements; such as the text field of the link element as defined in
+[CommonMark][commonmark-links].
 
-For example:
+### Text Field
 
-- Balanced: `<#my<id>>`
-  - Renders: `<span id="my<id>">my&lt;id&gt;</span>`
-  - Note: Propagated angle brackets must be escaped in HTML content!
-- Escaped: `[text]<#foo\>bar>`
-  - Renders: `<span id="foo>bar">text</span>`
+The text field is optional and comes after the first whitespace character within
+the brackets. Any square brackets within the text field must either be balanced
+or escaped, following the same rules as other bracketed elements; such as the
+text field of the link element as defined in [CommonMark][commonmark-links].
+
+The text field may be empty to create invisible anchors. For example, `[!foo ]`
+renders as `<span id="foo"></span>`. When multiple whitespace characters
+separate the ID and text, all leading and trailing whitespace in the text field
+is trimmed. For example, `[!foo bar ]` renders as `<span id="foo">bar</span>`.
 
 ## Referencing Anchors
 
@@ -98,15 +96,15 @@ Since anchors behave substantially like links, parsers should ensure that they
 can be used in all the same places that links are used, according to the
 specification followed by the parser. Broadly speaking (after a quick review of
 some of the specifications), this implies that anchors can be used in headings,
-blockquotes, lists, and tables, but not code blocks. However, this summary does
+blockquotes, lists, and tables, but not code blocks. However, this document does
 not imply an implementation constraint beyond the underlying Markdown
 specification you are implementing.
 
 ### Nested Anchors
 
-While nested anchors are syntactically valid (e.g., `[<#inner>]<#outer>`), they
-are not recommended as they create complex ID relationships and may confuse
-readers about which anchor is being referenced.
+While nested anchors are syntactically valid (e.g., `[!outer [!inner] text]`),
+their use is not recommended as they create complex ID relationships and may
+confuse readers about which anchor is being referenced.
 
 ## Examples
 
@@ -115,9 +113,9 @@ readers about which anchor is being referenced.
 ```markdown
 # Aristotle, Nicomachean Ethics Book I
 
-[1094a1]<#ne-1094a1> Every art and every inquiry, and similarly every action and
+[!ne-1094a1 1094a1] Every art and every inquiry, and similarly every action and
 pursuit, is thought to aim at some good; and for this reason the good has
-rightly been declared to be that at which all things aim. [1094a3]<#ne-1094a3>
+rightly been declared to be that at which all things aim. [!ne-1094a3 1094a3]
 But a certain difference is found among ends; some are activities, others are
 products apart from the activities that produce them.
 
@@ -133,25 +131,26 @@ exists for non-structural anchors. The syntax defined in this document can be
 used in headings. This implies that this syntax can either supplement or replace
 this existing extension.
 
-The `<#id>` and `[display]<#id>` syntaxes were chosen because:
+The `[!id]` and `[!id text]` syntaxes were chosen because:
 
-1. **Consistency with fragment identifiers**: The `#` symbol is already
-   associated with anchors and fragments in URLs, making this extension feel
-   natural.
-2. **No parsing conflicts**: The `<#id>` and `[display]<#id>` patterns do not
-   conflict with any existing CommonMark syntax and tested clean across major
-   parsers.
-3. **Clean separation of concerns**: The simple form (`<#id>`) uses the ID as
-   display text, while the custom form (`[display]<#id>`) allows any display
-   text including empty for invisible anchors. This gives full flexibility.
-4. **Familiar bracket usage**: The `[display]` portion follows the same rules as
-   CommonMark link text, leveraging existing knowledge.
+1. **Consistency with fragment identifiers**: The `!` symbol provides a clear
+   marker for anchor syntax.
+2. **No parsing conflicts**: The `[!id]` and `[!id text]` patterns do not
+   conflict with any existing CommonMark syntax.
+3. **Clean separation of concerns**: The simple form (`[!id]`) uses the ID as
+   display text, while the custom form (`[!id text]`) allows any display text
+   including empty for invisible anchors. This gives full flexibility.
+4. **Familiar bracket usage**: The square bracket syntax follows patterns
+   familiar from CommonMark links, leveraging existing knowledge.
 5. **Leverages existing linking**: References use standard CommonMark fragment
    links, requiring no new syntax.
 6. **Minimal HTML**: Produces simple, clean HTML without mandating presentation
    decisions.
 7. **Unified namespace**: Works seamlessly with any other ID-generating
    mechanisms since they all share the HTML ID namespace.
+8. **ID-first ordering**: Placing the ID first makes it the primary concern,
+   with optional display text as a secondary consideration, which aligns with
+   the purpose of creating referenceable locations.
 
 The choice to treat anchors as pure location markers reflects the reality of
 versification systems where markers often don't align with structural document
